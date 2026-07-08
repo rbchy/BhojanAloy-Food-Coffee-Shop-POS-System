@@ -1,4 +1,4 @@
-# Bhojan-Aloy — Food & Coffee Shop POS System
+# Bhojanaloy — Food & Coffee Shop POS System
 
 A complete Java Swing + MySQL point-of-sale system: order taking, menu &
 recipe management, inventory tracking, employee/supplier records, sales
