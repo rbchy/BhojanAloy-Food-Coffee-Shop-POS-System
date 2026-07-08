@@ -1,90 +1,9 @@
-# BhojanAloy — Food & Coffee Shop POS System
+# Bhojan-Aloy — Food & Coffee Shop POS System
 
-![Java](https://img.shields.io/badge/Java-17+-orange?logo=java)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql)
-![JDBC](https://img.shields.io/badge/JDBC-Driver-green)
-![Swing](https://img.shields.io/badge/UI-Java%20Swing-9B59B6)
-![Eclipse](https://img.shields.io/badge/IDE-Eclipse-2C2255?logo=eclipseide)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-
-**Author:** Ranajit Baran Chowdhury (RB Chowdhury)
-**Profile:** QA Automation Engineer & Full Stack Developer
-**Email:** chyranajit@gmail.com
-**GitHub:** [@rbchy](https://github.com/rbchy) | [@ranajitchowdhury](https://github.com/ranajitchowdhury)
-**Portfolio:** [rbc6543.wixsite.com/rbc-portfolio](https://rbc6543.wixsite.com/rbc-portfolio)
-**LinkedIn:** [linkedin.com/in/rbchy](https://linkedin.com/in/rbchy)
-
-A complete **Java Swing + MySQL point-of-sale system** for a food & coffee
-shop — end-to-end order taking, itemized bill preview with real Email/SMS
-delivery, multilingual recipe management, inventory tracking, station
-(kitchen) display, delivery management, payroll with overtime/holiday
-calculation, a customer loyalty program, and secure username/password login
-with role-based access (ADMIN / MANAGER / CASHIER).
-
----
-
-## 📋 Quick Overview
-
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| **Language** | Java (Core OOP, Swing) | 17+ |
-| **Database** | MySQL | 8.0+ |
-| **Connectivity** | JDBC (MySQL Connector/J) | 8.x/9.x |
-| **Architecture** | DAO + Service + GUI (layered, MVC-style) | Enterprise Pattern |
-| **Email/SMS** | Raw SMTP (`javax.net.ssl`) + Twilio REST (`java.net.http`) | No external jar |
-| **IDE** | Eclipse (project files included) | Latest |
-| **OS Support** | macOS, Windows, Linux | All |
-
----
-
-## ✨ Key Features
-
-### 🔐 Secure Authentication & Access Control
-- Username/password login with SHA-256 + per-user salt hashing
-- Role-based access: ADMIN / MANAGER / CASHIER, each seeing only the
-  screens their role permits
-- Centered login screen with a circular illustrated badge and a
-  multilingual in-app Help guide (❓ button)
-
-### 🛒 POS & Checkout
-- Category-tabbed menu grid with item photos (emoji fallback), live cart,
-  discount + 8% tax, multiple payment methods
-- Atomic checkout — stock deduction and inventory logging happen in the
-  same DB transaction as the order
-- Item-wise **Bill Preview** before printing or sending, with real
-  **Email/SMS receipt delivery** (Gmail SMTP / Twilio REST, no external jar)
-
-### 🍳 Multilingual Recipes
-- Product photo, prep time, difficulty, yield, ingredients, and
-  step-by-step instructions per menu item
-- Instructions available in **English / বাংলা / Español / हिंदी / العربية**
-  via an in-screen language selector, with full Add/Edit/Delete
-
-### 🚚 Orders, Delivery & Kitchen Display
-- Phone/Online order sources, Dine-in/Pickup/Delivery order types
-- Delivery queue with in-house rider or third-party agency assignment
-  (Pathao, Foodpanda, Steadfast, etc.)
-- Station (Kitchen) Display routes each line item to its prep counter with
-  a PENDING → PREPARING → READY → SERVED workflow
-
-### 💰 Payroll & Time Clock
-- Employee clock in/out, automatic Regular/Overtime/Weekend/Holiday pay
-  calculation, editable hours with duplicate-run protection
-- Direct Deposit / Cash / Check payout with printable pay stubs
-
-### 🎁 Customer Loyalty Program
-- Register customers by name + phone at checkout, earn 1 point/order,
-  automatic free item at 50 points
-- Optional email opt-in for new-menu-item announcements
-
-### 📊 Reporting & Inventory
-- Daily/30-day sales, item/category sales, employee performance,
-  low-stock alerts — all exportable to CSV
-- Raw ingredient stock levels with manual adjustment and audit log
-
-*(Full setup instructions, feature details, and database migration guides
-are below.)*
+A complete Java Swing + MySQL point-of-sale system: order taking, menu &
+recipe management, inventory tracking, employee/supplier records, sales
+reporting, and username/password login with role-based access
+(ADMIN / MANAGER / CASHIER).
 
 ## Project layout
 

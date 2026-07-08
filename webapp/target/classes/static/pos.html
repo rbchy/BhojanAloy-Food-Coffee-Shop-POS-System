@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bhojan-Aloy Demo - POS</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+    <h1>Bhojan-Aloy POS Demo</h1>
+    <div>
+        <span id="welcome-user"></span>
+        <a href="orders.html" id="view-orders-link">Order History</a>
+        <button id="logout-btn">Logout</button>
+    </div>
+</header>
+
+<main>
+    <h2>Menu</h2>
+    <div id="menu-list" class="menu-grid"></div>
+
+    <div class="cart-panel">
+        <h2>Cart</h2>
+        <table id="cart-table">
+            <thead>
+                <tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th></th></tr>
+            </thead>
+            <tbody id="cart-body"></tbody>
+        </table>
+        <p>Total: <span id="cart-total">$0.00</span></p>
+
+        <label for="payment-method">Payment Method</label>
+        <select id="payment-method">
+            <option value="CASH">Cash</option>
+            <option value="CARD">Card</option>
+            <option value="MOBILE_BANKING">Mobile Banking</option>
+        </select>
+
+        <div>
+            <button id="checkout-btn" disabled>Checkout</button>
+        </div>
+        <div id="checkout-error"></div>
+        <div id="checkout-success"></div>
+    </div>
+</main>
+
+<script src="js/app.js"></script>
+<script src="js/pos.js"></script>
+</body>
+</html>

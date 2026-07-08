@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bhojan-Aloy Demo - Order History</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+    <h1>Order History</h1>
+    <div>
+        <a href="pos.html" id="back-to-pos-link">Back to POS</a>
+        <button id="logout-btn">Logout</button>
+    </div>
+</header>
+
+<main>
+    <table id="orders-table">
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Payment</th>
+                <th>Total</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="orders-body"></tbody>
+    </table>
+</main>
+
+<script src="js/app.js"></script>
+<script>
+document.getElementById('logout-btn').addEventListener('click', logout);
+
+requireLogin().then(function () {
+    return apiGet('/api/orders');
+}).then(function (orders) {
+    var body = document.getElementById('orders-body');
+    body.innerHTML = '';
+    orders.forEach(function (o) {
+        var row = document.createElement('tr');
+        row.id = 'order-row-' + o.orderId;
+        row.setAttribute('data-order-id', o.orderId);
+        row.innerHTML =
+            '<td>' + o.orderNumber + '</td>' +
+            '<td>' + (o.orderDate || '') + '</td>' +
+            '<td>' + (o.employeeName || '') + '</td>' +
+            '<td>' + o.orderType + '</td>' +
+            '<td>' + o.paymentMethod + '</td>' +
+            '<td>$' + Number(o.totalAmount).toFixed(2) + '</td>' +
+            '<td>' + o.status + '</td>';
+        body.appendChild(row);
+    });
+});
+</script>
+</body>
+</html>
