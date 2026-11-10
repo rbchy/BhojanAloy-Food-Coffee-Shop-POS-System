@@ -247,17 +247,33 @@ public class OrderDAO {
 
     private static final java.time.format.DateTimeFormatter ORDER_NO_TIME =
             java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmmssSSS");
-    private static final java.util.concurrent.atomic.AtomicInteger ORDER_SEQ = new java.util.concurrent.atomic.AtomicInteger();
+    private static long lastOrderMillis;
+    private static int orderSeq;
 
     /**
-     * e.g. ORD-20261109-213605123-07. order_number is UNIQUE in the database, and the old
-     * "ORD-date-random 4 digits" scheme had about a 1-in-2 chance of a duplicate once a shop
-     * took ~120 orders in a day (birthday problem), which made that checkout fail.
-     * Millisecond time plus a per-process counter keeps it unique and still 25 characters.
+     * e.g. ORD-20261109-213605123-07 (25 characters; the column is VARCHAR(30) UNIQUE).
+     * The old "ORD-date-random 4 digits" scheme had about a 1-in-2 chance of a duplicate once a
+     * shop took ~120 orders in a day (birthday problem), which made that checkout fail.
+     * Millisecond time plus a 2-digit sequence is unique within the app: if 100 numbers are
+     * asked for in the same millisecond, the clock part is moved on by 1 ms instead of repeating.
      */
     public String generateOrderNumber() {
-        return "ORD-" + LocalDateTime.now().format(ORDER_NO_TIME) + "-"
-                + String.format("%02d", ORDER_SEQ.getAndIncrement() % 100);
+        long now = System.currentTimeMillis();
+        long millis;
+        int seq;
+        synchronized (OrderDAO.class) {
+            if (now > lastOrderMillis) {
+                lastOrderMillis = now;
+                orderSeq = 0;
+            } else if (++orderSeq > 99) {
+                lastOrderMillis++;
+                orderSeq = 0;
+            }
+            millis = lastOrderMillis;
+            seq = orderSeq;
+        }
+        LocalDateTime time = LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault());
+        return "ORD-" + time.format(ORDER_NO_TIME) + "-" + String.format("%02d", seq);
     }
 
     private Order mapRow(ResultSet rs) throws SQLException {
