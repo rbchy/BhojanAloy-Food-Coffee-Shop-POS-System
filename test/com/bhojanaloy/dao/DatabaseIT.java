@@ -172,6 +172,33 @@ class DatabaseIT {
         assertNull(customers.findByPhone("000"));
     }
 
+    // ---------------------------------------------------------------- recipes (5 languages)
+
+    @Test
+    void recipesKeepAllFiveLanguagesOnAFreshInstall() {
+        RecipeDAO recipes = new RecipeDAO();
+        com.bhojanaloy.model.Recipe cappuccino = recipes.getAll().stream()
+                .filter(r -> r.getRecipeName().equals("Cappuccino")).findFirst()
+                .orElseThrow(() -> new AssertionError("sample Cappuccino recipe missing"));
+        assertNotNull(cappuccino.getInstructionsBn(), "Bangla steps must be in the full schema, not only in migration_v5");
+        assertTrue(cappuccino.getInstructionsBn().contains("এসপ্রেসো"), cappuccino.getInstructionsBn());
+
+        com.bhojanaloy.model.Recipe r = new com.bhojanaloy.model.Recipe();
+        r.setItemId(menuItem("Mocha").getItemId());
+        r.setRecipeName("IT Mocha " + System.nanoTime());
+        r.setDifficulty("Easy");
+        r.setPrepTimeMin(4);
+        r.setYieldQty(1);
+        r.setInstructions("1. Pull a shot.");
+        r.setInstructionsBn("১. একটি শট নিন।");
+        r.setInstructionsAr("1. اسحب جرعة.");
+        assertTrue(recipes.addRecipe(r), "recipe insert failed - see the SQL error above");
+        com.bhojanaloy.model.Recipe back = recipes.getAll().stream()
+                .filter(x -> x.getRecipeName().equals(r.getRecipeName())).findFirst().orElseThrow();
+        assertEquals("১. একটি শট নিন।", back.getInstructionsBn(), "utf8mb4 round trip");
+        assertEquals("1. اسحب جرعة.", back.getInstructionsAr());
+    }
+
     // ---------------------------------------------------------------- schema vs code
 
     @Test
