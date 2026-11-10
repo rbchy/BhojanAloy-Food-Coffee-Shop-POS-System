@@ -1,0 +1,18 @@
+[Unit]
+Description=Bhojan-Aloy Web Demo (QA Automation)
+After=network.target mysql.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu
+Environment="DB_URL=jdbc:mysql://localhost:3306/bhojan_aloy?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+Environment="DB_USER=bhojan_web"
+Environment="DB_PASSWORD=CHANGE_ME"
+Environment="PORT=8080"
+ExecStart=/usr/bin/java -jar /home/ubuntu/bhojanaloy-webapp.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

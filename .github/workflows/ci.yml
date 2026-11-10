@@ -1,0 +1,140 @@
+# Bhojanaloy POS — CI pipeline
+#   desktop : MySQL 8 + schema/sample data -> mvn verify (unit + DAO integration tests) -> launch the Swing app under Xvfb
+#   webapp  : MySQL 8 + schema/sample data -> mvn verify (MockMvc + API integration tests) -> run the jar and smoke-test it with curl
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DB_URL: jdbc:mysql://127.0.0.1:3306/bhojan_aloy?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+  DB_USER: root
+  DB_PASSWORD: root
+
+jobs:
+  desktop:
+    name: Desktop app (Swing) - unit + database tests, launch check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shared code is identical in desktop and web app
+        run: ./scripts/check-shared-code.sh
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Load database (schema + sample data)
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot --default-character-set=utf8mb4 < database/bhojan_aloy_database.sql
+          mysql -h 127.0.0.1 -uroot -proot bhojan_aloy -e "SHOW FULL TABLES; SELECT username, role FROM users;"
+
+      - name: Build and test (mvn verify)
+        run: mvn -B -ntp verify
+
+      - name: Launch check (the POS must still be running after 20 s)
+        run: |
+          sudo apt-get install -y -qq xvfb > /dev/null
+          set +e
+          timeout 20 xvfb-run -a java -jar target/bhojanaloy-desktop.jar > app.log 2>&1
+          code=$?
+          cat app.log
+          if [ "$code" = "124" ]; then echo "POS started and was still running - OK"; exit 0; fi
+          echo "POS exited early with code $code"; exit 1
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-test-reports
+          path: |
+            target/surefire-reports
+            target/failsafe-reports
+          if-no-files-found: ignore
+
+      - name: Upload desktop jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: bhojanaloy-desktop-jar
+          path: target/bhojanaloy-desktop.jar
+
+  webapp:
+    name: Web demo (Spring Boot) - API tests, live smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    defaults:
+      run:
+        working-directory: webapp
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Load database (schema + sample data)
+        run: mysql -h 127.0.0.1 -uroot -proot --default-character-set=utf8mb4 < ../database/bhojan_aloy_database.sql
+
+      - name: Build and test (mvn verify)
+        run: mvn -B -ntp verify
+
+      - name: Run the jar and smoke-test the API
+        run: |
+          nohup java -jar target/bhojanaloy-webapp.jar > web.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/api/health > /dev/null && break; sleep 2
+          done
+          set -x
+          curl -sf http://localhost:8080/api/health | grep '"db":"UP"'
+          curl -sf http://localhost:8080/login.html | grep 'id="login-btn"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/menu)" = 401
+          curl -sf -c jar.txt -H 'Content-Type: application/json' \
+               -d '{"username":"farida","password":"admin123"}' http://localhost:8080/api/auth/login | grep MANAGER
+          ITEM=$(curl -sf -b jar.txt http://localhost:8080/api/menu | python3 -c "import json,sys; print(json.load(sys.stdin)[0]['itemId'])")
+          curl -sf -b jar.txt -H 'Content-Type: application/json' \
+               -d "{\"items\":[{\"itemId\":$ITEM,\"quantity\":1}],\"paymentMethod\":\"CASH\"}" \
+               http://localhost:8080/api/orders/checkout | grep orderNumber
+
+      - name: Show server log on failure
+        if: failure()
+        run: tail -n 100 web.log || true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-test-reports
+          path: |
+            webapp/target/surefire-reports
+            webapp/target/failsafe-reports
+          if-no-files-found: ignore

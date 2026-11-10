@@ -1,0 +1,8 @@
+bin/
+target/
+db.properties
+.DS_Store
+*.zip
+*.tgz
+.settings/
+dependency-reduced-pom.xml
