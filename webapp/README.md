@@ -19,13 +19,11 @@
 
 ## লগইন ক্রেডেনশিয়াল (স্যাম্পল ডেটা থেকে)
 
-মূল প্রজেক্টের README অনুযায়ী (`admin123` পাসওয়ার্ড দিয়ে):
+স্যাম্পল ডেটার সব অ্যাকাউন্টের পাসওয়ার্ড `admin123` (CI-তে প্রতিবার যাচাই করা হয়):
 - `admin` / `admin123` — ADMIN
 - `farida` / `admin123` — MANAGER (employee_id সহ, checkout করতে পারবে)
 - `sabbir` / `admin123` — CASHIER (employee_id সহ, checkout করতে পারবে)
 
-যদি লগইন ফেইল করে, মূল প্রজেক্টের README-র "First login" সেকশন অনুযায়ী
-`PasswordUtil` দিয়ে হ্যাশ রিজেনারেট করে নিন।
 
 ## লোকালি বিল্ড ও রান করা
 
@@ -37,8 +35,9 @@ mvn clean package
 java -jar target/bhojanaloy-webapp.jar
 ```
 
-ডিফল্টভাবে এটা `localhost:3306`-এর `bhojan_aloy` ডাটাবেসে (user: root,
-password: `Admin123!`) কানেক্ট করার চেষ্টা করবে — ঠিক ডেস্কটপ অ্যাপের মতোই।
+ডিফল্টভাবে এটা `localhost:3306`-এর `bhojan_aloy` ডাটাবেসে user `root` (খালি পাসওয়ার্ড) দিয়ে
+কানেক্ট করার চেষ্টা করবে। কোডে কোনো পাসওয়ার্ড লেখা নেই — এনভায়রনমেন্ট ভ্যারিয়েবল বা
+`db.properties` ফাইল (git-ignored, `db.properties.example` দেখুন) দিয়ে দিন।
 আলাদা DB credential দিতে চাইলে এনভায়রনমেন্ট ভ্যারিয়েবল সেট করুন:
 
 ```
@@ -72,6 +71,15 @@ java -jar target/bhojanaloy-webapp.jar
    `sudo certbot --nginx -d আপনার_ডোমেইন` দিয়ে ফ্রি SSL নিন।
 4. প্রতিদিন ডেমো ডেটা রিসেট করতে `deploy/reset_demo_data.sql` cron-এ বসান
    (ফাইলের ভেতরের কমেন্টে exact cron লাইন আছে)।
+
+## টেস্ট
+
+```
+mvn verify          # MockMvc টেস্ট; DB_URL সেট থাকলে আসল MySQL-এ API টেস্টও (PosApiIT) চলে
+```
+
+শেয়ার করা DAO/model/service ক্লাসগুলো `src/` থেকে হুবহু কপি; `scripts/check-shared-code.sh`
+CI-তে দেখে যে দুই কপি একই আছে কি না।
 
 ## QA Automation-এর জন্য নোট
 
